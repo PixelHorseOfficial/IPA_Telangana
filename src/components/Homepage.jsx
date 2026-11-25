@@ -14,6 +14,15 @@ const words = (t) =>
     <span key={i} className="reveal-word">{w} </span>
   ));
 
+// clickable, but never leaves the page: scrolls to a section on this same page instead of navigating
+const goTo = (id) => (e) => {
+  e.preventDefault();
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (window.__lenis) window.__lenis.scrollTo(el);
+  else el.scrollIntoView({ behavior: "smooth" });
+};
+
 const objectives = [
   { img: "/images/objective-1.png", name: "Education", title: "Promoting Pharmacy Education", meta: [["FOR", "STUDENTS"], ["VIA", "TRAINING"]], desc: "Supporting quality pharmacy education, training and skill development for students and professionals across Hyderabad." },
   { img: "/images/objective-2.png", name: "Research", title: "Supporting Pharmaceutical Research", meta: [["FOR", "SCIENTISTS"], ["VIA", "INNOVATION"]], desc: "Encouraging research, innovation and scientific development in pharmaceutical sciences and drug discovery." },
@@ -97,6 +106,7 @@ const affiliations = [
 ];
 
 // Dates are taken from the upload folder of each post (2024/10, 2024/09) — change to exact dates if you have them.
+// `href` is kept for reference only; clicking a row opens a popup on this page instead of leaving it.
 const news = [
   { title: "Notice: IPA Counting Communication Members", tag: "Notice", date: "OCT 2024", href: "https://ipa-goa.org/notice/", file: "PDF" },
   { title: "Duplicate Issuance", tag: "Latest News", date: "9 OCT 2024", href: "https://ipa-goa.org/duplicate-issuance/", file: "PDF" },
@@ -232,6 +242,7 @@ export default function Homepage() {
   const ldrMarqRef = useRef(null);   // members' photo strip
   const regNameRef = useRef(null);
   const [regEvent, setRegEvent] = useState(null);      // event being registered for
+  const [newsItem, setNewsItem] = useState(null);      // news item shown in the popup (stays on this page)
   const [reg, setReg] = useState({ name: "", email: "", phone: "" });
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -271,11 +282,6 @@ export default function Homepage() {
         onUpdate: () => hero.classList.toggle("is-two", tl.time() > 1.1),
       });
 
-      // 0.00-0.65  welcome text fades out while the photo zooms in ~8% and blurs
-      // 0.45-1.05  pale veil washes over the blurred photo (to ~60%)
-      // 1.15-1.70  "About" headline lines rise out of a mask, one after the other
-      // 1.35-2.05  right column fades in, paragraph words light up
-      // 1.55-1.85  veil completes to solid pale
       tl.to(".hero-inner-1", { opacity: 0, duration: 0.65, ease: "none" }, 0)
         .to(".hero-bg", { scale: 1.08, duration: 0.8, ease: "power1.out" }, 0)
         .to(".hero-bg", { filter: "blur(18px)", duration: 0.7, ease: "none" }, 0)
@@ -599,20 +605,23 @@ export default function Homepage() {
     };
   }, []);
 
-  // registration dialog: Esc closes, page scroll locked, first field focused
+  // dialogs (registration + news): Esc closes, page scroll locked, first field focused
+  const dialogOpen = !!(regEvent || newsItem);
   useEffect(() => {
-    if (!regEvent) return;
-    const onKey = (e) => { if (e.key === "Escape") setRegEvent(null); };
+    if (!dialogOpen) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") { setRegEvent(null); setNewsItem(null); }
+    };
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     if (window.__lenis) window.__lenis.stop();          // page must not scroll behind the dialog
-    if (regNameRef.current) regNameRef.current.focus();
+    if (regEvent && regNameRef.current) regNameRef.current.focus();
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
       if (window.__lenis) window.__lenis.start();
     };
-  }, [regEvent]);
+  }, [dialogOpen, regEvent]);
 
   return (
     <div className="home">
@@ -635,8 +644,8 @@ export default function Homepage() {
               The voice of pharmacists in Telangana — advancing pharmacy education, practice and public health.
             </p>
             <div className="hero-btns">
-              <Link to="/about" className="btn-primary">About Us →</Link>
-              <Link to="/membership" className="btn-secondary">Become a Member</Link>
+              <Link to="/about" className="btn-primary" onClick={goTo("objectives")}>About Us →</Link>
+              <Link to="/membership" className="btn-secondary" onClick={goTo("membership")}>Become a Member</Link>
             </div>
           </div>
         </div>
@@ -655,7 +664,7 @@ export default function Homepage() {
               <p className="p2-text">
                 {words("The Indian Pharmaceutical Association is the voice of pharmacists in Telangana. For more than 85 years, IPA has connected students, educators, researchers and industry to advance pharmacy education, professional practice and public health — as part of a national body of over 20,000 members.")}
               </p>
-              <Link to="/about" className="p2-link">Read more about IPA →</Link>
+              <Link to="/about" className="p2-link" onClick={goTo("objectives")}>Read more about IPA →</Link>
             </div>
           </div>
         </div>
@@ -698,6 +707,7 @@ export default function Homepage() {
                       className="obj-go"
                       aria-label={`Learn more: ${o.title}`}
                       tabIndex={i === active ? 0 : -1}
+                      onClick={(e) => { e.preventDefault(); activate(i); }}
                     >
                       →
                     </Link>
@@ -855,7 +865,7 @@ export default function Homepage() {
                 <ul className="mem-card-points">
                   {t.points.map((p) => <li key={p}>{p}</li>)}
                 </ul>
-                <Link to="/membership" className="mem-card-link">
+                <Link to="/membership" className="mem-card-link" onClick={goTo("contact")}>
                   Apply <span aria-hidden="true">→</span>
                 </Link>
               </article>
@@ -874,7 +884,7 @@ export default function Homepage() {
 
           <div className="mem-cta">
             <p>Ready to be part of IPA Telangana?</p>
-            <Link to="/membership" className="btn-primary">Apply for Membership →</Link>
+            <Link to="/membership" className="btn-primary" onClick={goTo("contact")}>Apply for Membership →</Link>
           </div>
         </div>
       </section>
@@ -917,7 +927,13 @@ export default function Homepage() {
           <ul className="news-list">
             {news.map((n, i) => (
               <li className="news-item" key={n.title}>
-                <a className="news-row" href={n.href} target="_blank" rel="noopener noreferrer">
+                {/* clickable, but opens a popup on this page — no redirect to other pages or sites */}
+                <a
+                  className="news-row"
+                  href="#news"
+                  role="button"
+                  onClick={(e) => { e.preventDefault(); setNewsItem(n); }}
+                >
                   <span className="news-bg" aria-hidden="true" />
                   <span className="news-num">{String(i + 1).padStart(2, "0")}</span>
                   <span className="news-name">{n.title}</span>
@@ -930,7 +946,7 @@ export default function Homepage() {
           </ul>
 
           <div className="news-more">
-            <Link to="/news" className="btn-primary">View all news →</Link>
+            <Link to="/news" className="btn-primary" onClick={goTo("news")}>View all news →</Link>
           </div>
         </div>
       </section>
@@ -1057,6 +1073,22 @@ export default function Homepage() {
               </label>
               <button type="submit" className="btn-primary full">Confirm registration</button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* news dialog — opens on this page, nothing is redirected */}
+      {newsItem && (
+        <div className="ev-modal" onMouseDown={(e) => { if (e.target === e.currentTarget) setNewsItem(null); }}>
+          <div className="ev-dialog" role="dialog" aria-modal="true" aria-labelledby="news-dialog-title">
+            <button type="button" className="ev-close" aria-label="Close" onClick={() => setNewsItem(null)}>✕</button>
+            <span className="ev-dialog-kicker">{newsItem.tag}</span>
+            <h3 id="news-dialog-title">{newsItem.title}</h3>
+            <p className="ev-dialog-meta">{newsItem.date} · {newsItem.file}</p>
+            <p className="ev-dialog-meta">
+              The full {newsItem.file === "IMAGE" ? "image" : "document"} will be available here soon.
+            </p>
+            <button type="button" className="btn-primary full" onClick={() => setNewsItem(null)}>Close</button>
           </div>
         </div>
       )}
