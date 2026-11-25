@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+/* FOOTER — same navy, type and motion language as the homepage sections */
+.footer {
+  --bg: #0b1240; --white: #fff; --mute: rgba(255, 255, 255, 0.64); --faint: rgba(255, 255, 255, 0.44);
+  --line: rgba(255, 255, 255, 0.14); --accent: #9fb0ff;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  position: relative; overflow: hidden; box-sizing: border-box;
+  font-family: 'Manrope', 'Segoe UI', Arial, sans-serif;
+  background: var(--bg); color: var(--white); padding: 96px 5% 0;
+}
+.footer *, .footer *::before, .footer *::after { box-sizing: border-box; }
+
+/* the hero photo, very faint, fading into solid navy toward the bottom */
+.ft-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, var(--bg) 0%, rgba(11, 18, 64, 0.2) 45%, var(--bg) 100%); }
+.ft-inner { position: relative; z-index: 1; max-width: 1240px; margin: 0 auto; }
+
+.footer ul { list-style: none; margin: 0; padding: 0; }
+.footer a { color: inherit; text-decoration: none; }
+.footer a:focus-visible, .ft-top-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
+
+/* ---- top: brand left, link columns right ---- */
+.ft-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) repeat(3, minmax(0, 0.7fr)); gap: 48px; align-items: start; }
+
+/* brand column */
+.ft-logo { display: inline-grid; place-items: center; padding: 12px 20px; border-radius: 14px; background: #f3f7ff; box-shadow: 0 18px 40px rgba(3, 6, 28, 0.35); }
+.ft-logo img { display: block; height: clamp(55px, 4.2vw, 90px); width: auto; max-width: 100%; object-fit: contain; }
+.ft-about-text { margin: 26px 0 0; max-width: 380px; font-size: 16px; line-height: 1.6; color: var(--mute); }
+.ft-contact { display: flex; flex-direction: column; gap: 6px; margin: 26px 0 0; font-style: normal; font-size: 16px; line-height: 1.55; color: rgba(255, 255, 255, 0.92); }
+.ft-contact a { width: fit-content; transition: color 0.4s ease; }
+.ft-contact a:hover { color: var(--accent); }
+
+.ft-btn {
+  display: inline-flex; align-items: center; gap: 12px; margin-top: 30px; padding: 14px 28px; border-radius: 999px;
+  background: #fff; color: #0d1445 !important; font-weight: 700; font-size: 15px;
+  transition: background 0.35s ease, transform 0.5s var(--ease);
+}
+.ft-btn span { transition: transform 0.4s var(--ease); }
+.ft-btn:hover { background: #e6edff; transform: translateY(-3px); }
+.ft-btn:hover span { transform: translateX(5px); }
+
+/* link columns */
+.ft-col h4 { margin: 0 0 22px; font-size: 14px; font-weight: 600; letter-spacing: 0; color: var(--accent); }
+.ft-col li + li { margin-top: 2px; }
+
+/* a short line grows in front of the link on hover and the text slides across */
+.ft-link { display: flex; align-items: center; padding: 8px 0; font-size: 17px; color: var(--mute); transition: color 0.4s ease; }
+.ft-link::before { content: ""; width: 0; height: 1px; margin-right: 0; background: var(--accent); transition: width 0.5s var(--ease), margin 0.5s var(--ease); }
+.ft-link:hover, .ft-link:focus-visible { color: var(--white); }
+.ft-link:hover::before, .ft-link:focus-visible::before { width: 16px; margin-right: 12px; }
+
+/* ---- giant wordmark: JS sets the font-size so it spans the full width ---- */
+.ft-mark { margin: 56px 0 8px; overflow: hidden; user-select: none; }
+.ft-mark-line {
+  display: inline-block; white-space: nowrap;
+  font-family: 'Anton', 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; font-weight: 400; text-transform: uppercase;
+  font-size: clamp(60px, 14vw, 250px); line-height: 0.98; letter-spacing: 0.005em; color: var(--accent);
+}
+.ft-ch { display: inline-block; transition: color 0.5s ease; will-change: transform; }
+.ft-ch:hover { color: #fff; }
+
+/* ---- bottom bar ---- */
+.ft-bottom {
+  display: flex; justify-content: space-between; align-items: center; gap: 18px 32px; flex-wrap: wrap;
+  padding: 22px 0 28px; border-top: 1px solid var(--line);
+  font-size: 14px; line-height: 1.5; color: var(--mute);
+}
+.ft-credit { display: flex; flex-direction: column; gap: 4px; }
+.ft-credit b { font-weight: 600; color: var(--accent); }
+.ft-bottom-right { display: flex; align-items: center; gap: 18px 32px; flex-wrap: wrap; }
+.ft-legal { display: flex; gap: 26px; }
+.ft-legal a { transition: color 0.4s ease; }
+.ft-legal a:hover { color: var(--white); }
+.ft-top-btn {
+  display: inline-flex; align-items: center; gap: 10px; padding: 0; background: none; border: 0; cursor: pointer;
+  font: inherit; color: var(--accent);
+}
+.ft-top-btn span { transition: transform 0.4s var(--ease); }
+.ft-top-btn:hover span { transform: translateY(-4px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ft-btn, .ft-btn span, .ft-link, .ft-link::before, .ft-ch, .ft-top-btn span { transition: none; }
+}
+
+@media (max-width: 1100px) {
+  .ft-grid { grid-template-columns: 1fr 1fr 1fr; gap: 48px 36px; }
+  .ft-brand { grid-column: 1 / -1; }
+}
+
+@media (max-width: 900px) {
+  .footer { padding: 70px 5% 0; }
+  .ft-mark { margin-top: 40px; }
+}
+
+@media (max-width: 560px) {
+  .ft-grid { grid-template-columns: 1fr 1fr; }
+  .ft-bottom, .ft-bottom-right { flex-direction: column; align-items: flex-start; }
+  .ft-legal { gap: 20px; flex-wrap: wrap; }
+}

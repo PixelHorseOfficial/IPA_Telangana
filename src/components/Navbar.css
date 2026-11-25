@@ -1,0 +1,293 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+
+/* ============ IPA NAVBAR: full-width bar, content in the middle 80%: big logo on the left, menu on the right ============ */
+:root {
+  --blue-dark: #0d1445;
+  --blue: #1a237e;
+  --blue-mid: #283593;
+  --blue-light: #eef1ff;
+  --white: #ffffff;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* side space of the bar: the content sits in the middle 80% on a wide screen (10% each side, reached at 1920px)
+     and eases down to 3.5% on smaller laptops so the menu always has room */
+  --pad-x: clamp(3.5%, calc((100vw - 1400px) * 0.369), 10%);
+
+  /* logo height grows with the screen (68px on a small laptop -> ~108px at 1920px, max 120px);
+     the bar is exactly as tall as the logo + its padding. Homepage.css reads --nav-h so sticky sections stay in step. */
+  --logo-h: clamp(68px, calc(7.2vw - 31px), 120px);
+  --nav-h: calc(var(--logo-h) + 16px);
+}
+
+* { box-sizing: border-box; }
+
+/* keeps the page from jumping sideways when the scrollbar hides during the intro / mobile menu */
+html { scrollbar-gutter: stable; }
+
+/* ---------- Scroll progress ---------- */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; height: 3px; z-index: 2000;
+  background: linear-gradient(90deg, var(--blue-dark), var(--blue-mid), #5c6bc0);
+  transition: width 0.1s linear;
+}
+
+/* ---------- Header: 100% width ---------- */
+.navbar {
+  position: fixed; top: 0; left: 0; right: 0; width: 100%;
+  z-index: 1000;
+  padding: 0;
+  background: transparent;
+  font-family: 'Manrope', 'Segoe UI', Arial, sans-serif;
+}
+
+.navbar-glass {
+  width: 100%;
+  padding: 8px var(--pad-x);
+  min-height: var(--nav-h);
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(26, 35, 126, 0.08);
+  box-shadow: 0 6px 28px rgba(26, 35, 126, 0.08);
+  transition: background 0.35s ease, box-shadow 0.35s ease;
+}
+
+/* glass on scroll */
+.navbar.scrolled .navbar-glass {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 10px 34px rgba(26, 35, 126, 0.14);
+}
+
+/* ---------- Logo (left) ---------- */
+.logo { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; }
+.logo-img {
+  height: var(--logo-h); width: auto; display: block; object-fit: contain;
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+.logo:hover .logo-img { transform: scale(1.04); filter: drop-shadow(0 4px 10px rgba(26,35,126,0.25)); }
+
+/* ---------- Nav (right) ---------- */
+/* the menu takes ALL the room between the logo and the right edge and spreads its items evenly,
+   so there is never an empty hole beside the logo (the last item group = the two buttons stays at the far right) */
+.nav-links { display: flex; align-items: center; justify-content: flex-end; flex: 1 1 auto; flex-wrap: nowrap; padding-left: clamp(24px, 3vw, 72px); }
+.nav-group { display: flex; align-items: center; justify-content: space-between; flex: 1 1 auto; gap: 2px; flex-wrap: nowrap; }
+
+.nav-item {
+  position: relative;
+  animation: linkIn 0.55s var(--ease) both;
+  animation-delay: calc(var(--d) + 150ms);
+}
+@keyframes linkIn {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.nav-links a,
+.drop-btn {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px clamp(8px, 0.58vw, 12px);              /* text and spacing scale with the screen so it never crowds the logo */
+  font-family: inherit;
+  font-size: clamp(13px, 0.72vw, 14.5px); font-weight: 600; letter-spacing: -0.01em; text-transform: none;
+  text-decoration: none; white-space: nowrap;
+  color: var(--blue);
+  background: none; border: none; border-radius: 999px; cursor: pointer;
+  transition: color 0.3s ease, background 0.3s ease, transform 0.3s var(--ease);
+}
+
+/* sliding underline */
+.nav-links a::after,
+.drop-btn::after {
+  content: ""; position: absolute; left: 50%; bottom: 3px;
+  width: 0; height: 2px; border-radius: 10px;
+  background: linear-gradient(90deg, var(--blue), #5c6bc0);
+  transform: translateX(-50%);
+  transition: width 0.35s var(--ease);
+}
+.nav-links a:hover,
+.drop-btn:hover {
+  background: rgba(26, 35, 126, 0.07);
+  color: var(--blue-dark);
+  transform: translateY(-2px);
+}
+.nav-links a:hover::after,
+.drop-btn:hover::after { width: calc(100% - 24px); }
+
+/* active page */
+.nav-links a.active { background: var(--blue); color: var(--white); box-shadow: 0 6px 16px rgba(26,35,126,0.28); }
+.nav-links a.active::after { display: none; }
+
+/* arrow */
+.arrow { font-size: 11px; display: inline-block; transition: transform 0.3s var(--ease); }
+.arrow.up { transform: rotate(180deg); }
+
+/* ---------- Dropdown ---------- */
+.dropdown-menu {
+  position: absolute; top: calc(100% + 8px); left: 50%;
+  min-width: 230px; padding: 8px;
+  display: flex; flex-direction: column;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(26, 35, 126, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 22px 45px rgba(26, 35, 126, 0.2);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transform: translateX(-50%) translateY(14px) scale(0.96);
+  transform-origin: top center;
+  transition: opacity 0.3s ease, transform 0.35s var(--ease), visibility 0.3s;
+  z-index: 10;
+}
+/* invisible bridge so the menu doesn't close when the mouse crosses the gap */
+.dropdown-menu::before {
+  content: ""; position: absolute; top: -14px; left: 0; right: 0; height: 14px;
+}
+.dropdown-menu.show {
+  opacity: 1; visibility: visible; pointer-events: auto;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.dropdown-menu a {
+  padding: 11px 14px;
+  font-size: 15px; font-weight: 500; letter-spacing: -0.005em; text-transform: none;
+  border-radius: 12px;
+  opacity: 0;
+}
+.dropdown-menu a::after { display: none; }
+.dropdown-menu a:hover {
+  background: var(--blue-light);
+  padding-left: 20px;
+  transform: none;
+}
+
+/* staggered items when opening */
+.dropdown-menu.show a { animation: dropItem 0.35s var(--ease) both; }
+.dropdown-menu.show a:nth-child(1) { animation-delay: 40ms; }
+.dropdown-menu.show a:nth-child(2) { animation-delay: 80ms; }
+.dropdown-menu.show a:nth-child(3) { animation-delay: 120ms; }
+.dropdown-menu.show a:nth-child(4) { animation-delay: 160ms; }
+.dropdown-menu.show a:nth-child(5) { animation-delay: 200ms; }
+@keyframes dropItem {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ---------- Buttons (end of the right group) ---------- */
+.nav-actions { display: flex; align-items: center; gap: 8px; margin-left: clamp(10px, 1.2vw, 24px); }
+
+.nav-links .login-btn {
+  overflow: hidden;
+  background: var(--blue); color: var(--white);
+  padding: 11px clamp(16px, 1.15vw, 22px); font-weight: 700;
+  box-shadow: 0 6px 18px rgba(26, 35, 126, 0.3);
+}
+.nav-links .login-btn::after { /* shine sweep */
+  content: ""; position: absolute; top: 0; left: -80%; bottom: auto;
+  width: 50%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.45), transparent);
+  transform: skewX(-20deg);
+  transition: none;
+}
+.nav-links .login-btn:hover { background: var(--blue-dark); color: var(--white); transform: translateY(-2px) scale(1.03); }
+.nav-links .login-btn:hover::after { left: 130%; width: 50%; transition: left 0.7s ease; }
+
+.nav-links .contact-btn {
+  background: var(--white); color: var(--blue);
+  padding: 10px clamp(14px, 1vw, 20px); border: 1.5px solid var(--blue); font-weight: 700;
+}
+.nav-links .contact-btn::after { display: none; }
+.nav-links .contact-btn:hover { background: var(--blue); color: var(--white); transform: translateY(-2px) scale(1.03); }
+
+/* ---------- Hamburger / mobile bits (hidden on desktop) ---------- */
+.hamburger {
+  display: none; flex-direction: column; gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 8px; z-index: 1100;
+}
+.hamburger span { width: 26px; height: 3px; background: var(--blue); border-radius: 10px; transition: 0.35s var(--ease); }
+.hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+.mobile-close { display: none; }
+.nav-overlay { display: none; }
+
+/* ============ LAPTOP / TABLET / MOBILE: logo stays on the left, menu moves into the slide-in drawer ============
+   (1365px = DRAWER_MAX in Navbar.jsx) */
+@media (max-width: 1365px) {
+  :root { --logo-h: min(76px, calc((100vw - 110px) / 4.4)); }   /* never wider than the space beside the burger */
+  .navbar-glass { padding: 8px 16px; }
+  .hamburger { display: flex; }
+
+  .mobile-close {
+    display: block; position: absolute; top: 16px; right: 16px;
+    width: 36px; height: 36px; border: none; border-radius: 50%;
+    background: var(--blue); color: var(--white); font-size: 16px; cursor: pointer;
+  }
+
+  .nav-links {
+    display: flex;
+    position: fixed; top: 0; right: -100%;
+    width: 330px; max-width: 86vw; height: 100vh;
+    flex-direction: column; align-items: stretch; justify-content: flex-start;
+    gap: 4px; padding: 70px 18px 24px;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+    box-shadow: -12px 0 35px rgba(0, 0, 0, 0.15);
+    transition: right 0.45s var(--ease);
+    overflow-y: auto; z-index: 1050;
+  }
+  .nav-links.open { right: 0; }
+
+  /* both groups stack, one list inside the drawer */
+  .nav-group { flex-direction: column; align-items: stretch; justify-content: flex-start; flex: 0 0 auto; width: 100%; gap: 4px; }
+
+  .nav-item { width: 100%; animation: none; opacity: 1; }
+  .nav-links.open .nav-item { animation: mobIn 0.45s var(--ease) both; animation-delay: var(--d); }
+  @keyframes mobIn { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+
+  .nav-links a, .drop-btn { width: 100%; padding: 12px 14px; font-size: 16px; justify-content: space-between; }
+  .nav-links a::after, .drop-btn::after { display: none; }
+  .nav-links a:hover, .drop-btn:hover { transform: none; }
+
+  .dropdown-menu {
+    position: static; transform: none; min-width: 0;
+    margin: 4px 0 4px 12px; padding: 4px;
+    background: var(--blue-light); border: none; box-shadow: none;
+    display: none; opacity: 1; visibility: visible; pointer-events: auto;
+  }
+  .dropdown-menu::before { display: none; }
+  .dropdown-menu.show { display: flex; transform: none; }
+  .dropdown-menu a { opacity: 1; }
+
+  .nav-actions { flex-direction: column; width: 100%; margin: 16px 0 0; gap: 10px; }
+  .nav-actions a { justify-content: center; width: 100%; }
+  .nav-links .login-btn, .nav-links .contact-btn { padding: 12px 18px; }
+
+  .nav-overlay.show {
+    display: block; position: fixed; inset: 0; z-index: 1040;
+    background: rgba(13, 20, 69, 0.45); backdrop-filter: blur(2px);
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+}
+
+/* ============ LOGO INTRO ============
+   white screen + logo; the white collapses upward into the navbar bar while the logo lands on its spot */
+.intro {
+  position: fixed; inset: 0; z-index: 3000;
+  display: grid; place-items: center; pointer-events: none;
+}
+.intro-bg { position: absolute; inset: 0; background: #ffffff; will-change: clip-path; }
+.intro-logo {
+  position: relative;
+  width: min(86vw, 960px, calc(34vh * 4.4)); height: auto;   /* width-based so a phone never crops it */
+  clip-path: inset(100% 0 0 0);
+  will-change: transform, clip-path;
+}
+/* while the intro plays, the real logo and links wait (they are under the white cover anyway) */
+.navbar-glass.pre .logo-img { visibility: hidden; }
+.navbar-glass.pre .nav-item { animation: none; opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-item { animation: none; }
+  .dropdown-menu.show a { animation: none; opacity: 1; }
+}
